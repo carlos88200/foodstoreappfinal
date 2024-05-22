@@ -34,6 +34,7 @@ const DetailScreen = ({ route }) => {
     useEffect(() => {
         if (FoodItem !== undefined) {
             console.log("que tiene FOOD Item:", FoodItem);
+            console.log("url",Img,"espacio",FoodItem.Image)
         }
     }, [FoodItem]);
 
@@ -43,6 +44,7 @@ const DetailScreen = ({ route }) => {
                 IdUserFK: idUser,
                 IdFoodFK: id
             });
+            console.log("added");
             <Alert mx='$2.5' action="info" variant="solid" >
                 <AlertIcon as={InfoIcon} mr="$3" />
                 <AlertText>
@@ -50,22 +52,28 @@ const DetailScreen = ({ route }) => {
                 </AlertText>
             </Alert>
         } catch (error) {
-            console.error("Error al agregar a favoritos:", error);
+            console.error(idUser, id, "Error adding to favorites:", error);
         }
     }
 
-
     const AddFavorite = async () => {
         try {
-            const response = await axios.post(`${ApiUrl}FavoriteStore`, {
+            const data = {
                 IdUserFK: idUser,
                 IdFoodFK: Id
+            }
+            const response = await axios({
+                method: 'POST',
+                url: `${ApiUrl}FavoriteStore`,
+                data: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
             if (response) {
                 setMode('Added');
             }
             <Alert mx='$2.5' action="info" variant="solid" >
-                <AlertIcon as={InfoIcon} mr="$3" />
                 <AlertText>
                     added to favorites
                 </AlertText>
@@ -77,12 +85,23 @@ const DetailScreen = ({ route }) => {
 
     const deleteFavorite = async () => {
         try {
-            const response = await axios.post(`${ApiUrl}FavoriteDestroy/${Favorite}`, {
-                IdFoodFK: Id
+            const response = await axios({
+                method: 'POST',
+                url: `${ApiUrl}FavoriteDestroy/${Favorite}`,
+                data: {IdUserFK:idUser},
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
+
             if (response.data) {
                 setMode('Add');
             }
+            <Alert mx='$2.5' action="info" variant="solid" >
+                <AlertText>
+                    delete from favorites
+                </AlertText>
+            </Alert>
         } catch (error) {
 
         }
@@ -96,7 +115,7 @@ const DetailScreen = ({ route }) => {
                 try {
                     const response = await axios.get(`${ApiUrl}Userauth`, {
                         headers: {
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': `Bearer ${token}` 
                         }
                     });
                     setUserData(response.data);
@@ -113,11 +132,10 @@ const DetailScreen = ({ route }) => {
     }, []);
 
 
-
     const favoriteData = async () => {
         try {
             const data = {
-                IdUserFK: IdUs ,
+                IdUserFK: IdUs,
                 IdFoodFK: Id
             }
             console.log("se manda", data);
@@ -130,7 +148,9 @@ const DetailScreen = ({ route }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            if (favorite.data.id !== null) {
+            console.log("holaaa imprie",favorite);
+            
+            if (favorite.data.id && favorite.data.id.length > 0) {
                 setFavorite(favorite.data.id)
                 setMode('Added');
             }
@@ -138,20 +158,21 @@ const DetailScreen = ({ route }) => {
             console.log(error);
         }
     }
+    
     useEffect(() => {
         setTimeout(() => {
             favoriteData()
-        }, 2000)
+        }, 1500)
     }, []);
 
     return (
-        <Box mt={"$5"} padding={"$5"} height={"$full"}>
+        <Box mt={"$5"} padding={"$5"} height={"$full"} >
             <Image
                 size="md"
                 width={"$full"}
                 height={"$1/2"}
                 alt="login_image"
-                source={{ uri: `${Img + FoodItem.Image}` }}
+                source={{ uri: `${Img+FoodItem.Image}` }}
                 resizeMode="cover" style={{
                     alignSelf: "center"
                 }} />

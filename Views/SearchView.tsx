@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Box, Image, VStack, ScrollView, Divider, Button, ButtonText, View, Text, AvatarFallbackText, Avatar, Card, Heading } from '@gluestack-ui/themed';
-import React, { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ApiUrl, Img } from '../Views/API/Config';
 const SearchView = () => {
   const [formData, setData] = useState({});
@@ -10,25 +10,31 @@ const SearchView = () => {
   const [foodcateg, setFoodcateg] = useState<any[]>([]);
   const navigation = useNavigation();
 
+  useFocusEffect(
+    useCallback(()=>{
+      const data = async () => {
+        try {
+          const response = await axios.get(`${ApiUrl}foodIndex`);
+          setFoodData(response.data);
+        } catch (error) {
+          console.log("error getting the groups", error);
+        }
+      };
+      const dataGroup = async () => {
+        try {
+          const response = await axios.get(`${ApiUrl}FoodGroupIndex`);
+          setGroupData(response.data);
+        } catch (error) {
+          console.log("error getting the groups", error);
+        }
+      };
+      data();
+      dataGroup();
+
+    }, [])
+  );
   useEffect(() => {
-    const data = async () => {
-      try {
-        const response = await axios.get(`${ApiUrl}foodIndex`);
-        setFoodData(response.data);
-      } catch (error) {
-        console.log("error getting the groups", error);
-      }
-    };
-    const dataGroup = async () => {
-      try {
-        const response = await axios.get(`${ApiUrl}FoodGroupIndex`);
-        setGroupData(response.data);
-      } catch (error) {
-        console.log("error getting the groups", error);
-      }
-    };
-    data();
-    dataGroup();
+    
   }, []);
 
   const produc = (id: string) => {
@@ -43,22 +49,22 @@ const SearchView = () => {
 
 
   return (
-    <Box backgroundColor='white' height={"$full"} width={"$full"}>
-      <Box marginTop={"$3px"} display='$flex' flexDirection='row' overflowX='scroll' backgroundColor='#FAF7F6'>
+    <Box backgroundColor='white' height={"$full"} width={"$full"} >
+      <ScrollView  marginBottom={"$2"} marginTop={"$10px"} display='$flex' flexDirection='row'   horizontal={true}>
         {groupData.map((group, index) => (
 
-          <Button onPress={() => produc(group.id)} backgroundColor='#FFA600' margin={"$5px"} key={index} size="md" variant="solid" action="primary" isDisabled={false} isFocusVisible={false} >
+          <Button marginBottom={"$5"} marginTop={"$10"} marginLeft={"$2"} onPress={() => produc(group.id)} backgroundColor='#FFA600' margin={"$5px"} key={index} size="md" variant="solid" alignContent='center' action="primary" isDisabled={false} isFocusVisible={false} >
             <ButtonText color='white' >{group.Name} </ButtonText>
 
           </Button>
 
         ))}
 
-      </Box>
-      <ScrollView>
+      </ScrollView>
+      <ScrollView marginTop={"$2"} height={"$full"}>
         <VStack marginTop={"$3px"} backgroundColor='#FAF7F6' >
           {foodcateg.map((foof, index) => (
-            <Card key={index} size="md" variant="elevated" m="$3">
+            <Card key={index} size="md" variant="elevated" m="$3" > 
               <Image
                 mb="$6"
                 h={120}

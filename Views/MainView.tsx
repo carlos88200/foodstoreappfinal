@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Card, Heading, Image, Text, ScrollView, VStack, Button, ButtonText, Icon } from '@gluestack-ui/themed';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { getFoodItems } from './API/Request';
-import { FoodResponse , Img} from './API/Config';
+import { FoodResponse, Img } from './API/Config';
 
 const MainView = () => {
 
@@ -17,10 +17,13 @@ const MainView = () => {
             SetFoodItems(data);
         }
     }
+    useFocusEffect(
+        useCallback(()=>{
+            food();
+        },[])
+    );
 
-    useEffect(() => {
-        food();
-    }, []);
+    
 
     useEffect(() => {
         if (FoodItems !== undefined) {
@@ -39,7 +42,7 @@ const MainView = () => {
 
         <ScrollView height={"$full"}>
             <VStack>
-                {FoodItems && FoodItems.map((item, index) => (
+                {FoodItems && FoodItems.slice(0, 3).map((item, index) => (
                     <Card key={index} size="md" variant="elevated" m="$3">
                         <Image
                             mb="$6"
@@ -47,7 +50,7 @@ const MainView = () => {
                             width="$full"
                             borderRadius="$md"
                             source={{
-                                uri: `${Img+item.Image}`,
+                                uri: `${Img + item.Image}`,
                             }}
                         />
                         <Heading mb="$1" size="md">
@@ -56,8 +59,8 @@ const MainView = () => {
                         <Text size="sm">{item.Description}</Text>
                         <Text size="sm">Precio: {item.Price}</Text>
 
-                        <Button action={"primary"}   onPress={() => navigation.navigate('Details', {Id: item.id})} 
-                        backgroundColor={"#FFA600"} size={"lg"} width={"$full"} borderRadius={"$lg"} mt={"$2"}>
+                        <Button action={"primary"} onPress={() => navigation.navigate('Details', { Id: item.id })}
+                            backgroundColor={"#FFA600"} size={"lg"} width={"$full"} borderRadius={"$lg"} mt={"$2"}>
                             <ButtonText>
                                 See product
                             </ButtonText>

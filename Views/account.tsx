@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage'//async
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { ApiUrl } from '../Views/API/Config';
+//import ShoppingHistory from "../Views/Components/ShoppingHistory";
 
 const Account = () => {
     const [userData, setUserData] = useState({});
@@ -22,7 +24,7 @@ const Account = () => {
             if (token) {
 
                 try {
-                    const response = await axios.get("http://localhost/1.75/backend/public/api/Userauth", {
+                    const response = await axios.get(`${ApiUrl}Userauth`, {
                         headers: {
                             'Authorization': `Bearer ${token}`
                         }
@@ -44,6 +46,7 @@ const Account = () => {
         navigation.navigate('Principal');
 
     }
+    
 
     return (
         <Box backgroundColor='white' alignItems="center" mt={10} display="flex" flexDirection="column" height={"$full"} >
@@ -52,7 +55,7 @@ const Account = () => {
                 <Avatar bgColor='black' size="xl" marginLeft={"$10"} marginTop={"$10"}>
                     <AvatarFallbackText>{userData.Name}</AvatarFallbackText>
                 </Avatar>
-                <Text position='absolute' left={"33%"} color='white' fontSize={"$2xl"} marginTop={"$1/4"} >Hi, {userData.Name}</Text>
+                <Text position='absolute' left={"33%"} color='white' fontSize={"$2xl"} marginTop={"$12"} >Hi, {userData.Name}</Text>
             </Box>
             <Box width={"$full"}  p={4} >
                 <Text color='black' fontSize={"$2xl"}>Name: {userData.Name}</Text>
@@ -61,7 +64,12 @@ const Account = () => {
                 <Text color='black' fontSize={"$2xl"}>PhoneNumber: {userData.PhoneNumber}</Text>
                 <Text color='black' fontSize={"$2xl"}>Email: {userData.Email}</Text>
             </Box>
-            <Button onPress={onSubmit} action='primary' width={"$full"} backgroundColor='#FFA600' color='white' top={"80%"} p={2}>
+            <Button onPress={() => navigation.navigate('ShoppingHistory')} action='primary' marginBottom={"$2"} width={"$3/4"} backgroundColor='#FFA600' color='white' top={"60%"} p={2}>
+                <ButtonText>
+                     Shopping history
+                </ButtonText>
+            </Button>
+            <Button onPress={onSubmit} action='primary' width={"$3/4"} backgroundColor='#FFA600' color='white' top={"60%"} p={2}>
                 <ButtonText>
                     LogOut
                 </ButtonText>

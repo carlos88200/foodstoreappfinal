@@ -52,7 +52,7 @@ const Bagview = () => {
                 try {
                     const response = await axios.get(`${ApiUrl}carr/${idUser}`);
                     setCarData(response.data);
-                    console.log(response.data);
+                    console.log("inf",response.data);
                     response.data.forEach(element => {
                         total += element.food.Price;
                     });
@@ -93,7 +93,7 @@ const Bagview = () => {
             try {
                 const response = await axios.get(`${ApiUrl}carr/${idUser}`);
                 setCarData(response.data);
-                console.log(response.data);
+                console.log("dat",response.data);
                 response.data.forEach(element => {
                     total += element.food.Price;
                 });
@@ -104,26 +104,87 @@ const Bagview = () => {
         }
     }
 
-    const onSubmit = () => {
-        navigation.navigate('Home');
+    const onSubmit = async() => {
+        for(let dato of carData){
+            //console.log("data", dato);
+           
+            try{
+                const response = await axios.post(`${ApiUrl}ShoppingStore`,{
+                    Quantity: '1',
+                    IdUserFK: dato.IdUserFK,
+                    IdFoodFK: dato.IdFoodFK
+                });
+                console.log("added");
+
+            }catch(error){
+                console.log("we couldn't add them");
+                
+            }
+            
+            try {
+                
+                const response = await axios.post(`${ApiUrl}destroycar/${dato.id}`);
+                console.log("deleted", dato.id);
+            } catch (error) {
+                console.log("we couldn't delete them", error);
+            }
+            tokenString = await AsyncStorage.getItem('token');
+        token = JSON.parse(tokenString);
+        let idUser;
+        let carUser = [];
+        let caarEnd = [];
+        if (token) {
+            try {
+                console.log("id", id);
+                const response = await axios.post(`${ApiUrl}CarDestroy/${id}`);
+                console.log("deleted");
+            } catch (error) {
+                console.log("not deleted", error);
+            }
+            try {
+                const response = await axios.get(`${ApiUrl}Userauth`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                setUserData(response.data);
+                idUser = response.data.id;
+            } catch (error) {
+                console.log(" we cannot get the information ", error);
+            }
+            try {
+                const response = await axios.get(`${ApiUrl}carr/${idUser}`);
+                setCarData(response.data);
+                console.log("dat",response.data);
+                response.data.forEach(element => {
+                    total =0;
+                });
+                setTotalData(total);
+            } catch (error) {
+                console.log(" we cannot get the information car", error);
+            }
+        }
+            
+            
+        }
     }
 
     return (
         <Box backgroundColor='white' alignItems="center" mt={10} display="flex" flexDirection="column" height={"$full"} >
             <Box height={'40%'} width={'100%'} backgroundColor='#FFA600' p={4}>
-                <Avatar bgColor='black' size="xl" borderRadius="$full" marginLeft={"$1/3"} marginTop={"$10"}>
+                <Avatar bgColor='black' size="xl" borderRadius="$full" marginLeft={"$10%"} marginTop={"$10"}>
                     <AvatarFallbackText>{userData.Name}</AvatarFallbackText>
                 </Avatar>
-                <Text position='absolute' marginLeft={"$1/3"} color='white' fontFamily='Arial' size='2xl' marginTop={"$1/6"}>{userData.Name} </Text>
-                <Text position='absolute' marginLeft={"$1/3"} color='white' fontFamily='Arial' size='2xl' marginTop={"$1/6"}>{userData.FirstSurname}</Text>
-                <Text position='absolute' marginLeft={"$1/3"} color='white' fontFamily='Arial' size='2xl' marginTop={"$1/6"}>{userData.SecondSurname}</Text>
-                <Text position='absolute' color='white' fontFamily='Arial' size='2xl' mb="$1" marginTop={"$10"} marginLeft={"auto"}>
+                <Text position='absolute' marginLeft={"$35%"} color='white' fontFamily='Arial' size='2xl' marginTop={"$12%"}>{userData.Name} </Text>
+                <Text position='absolute' marginLeft={"$35%"} color='white' fontFamily='Arial' size='2xl' marginTop={"$17%"}>{userData.FirstSurname}</Text>
+                <Text position='absolute' marginLeft={"$35%"} color='white' fontFamily='Arial' size='2xl' marginTop={"$23%"}>{userData.SecondSurname}</Text>
+                <Text position='absolute' color='white' fontFamily='Arial' size='2xl' mb="$1" marginTop={"$45%"} marginLeft={"$50%"}>
                     Total: {totalData}.00 $
                 </Text>
             </Box>
 
-            <ScrollView width={"$full"} height={"$full"}>
-                <VStack marginTop={"$3px"} backgroundColor='white' width={"$full"} height={"$full"} >
+            <ScrollView width={"$full"} height={"$full"}  marginBottom={"$2"}>
+                <VStack alignContent='center' alignItems='center' marginTop={"$3px"} backgroundColor='white' width={"$full"} height={"$full"} >
                     {carData.map((car, index) => (
                         <Card key={index} size="md" variant="elevated" m="$3" width={"80%"} >
                             <Image
@@ -155,7 +216,7 @@ const Bagview = () => {
             </ScrollView>
 
 
-            <Button onPress={onSubmit} action='primary' position="fixed" width="300px" backgroundColor='#FFA600' color='white' marginTop={"80%"} p={2}>
+            <Button onPress={onSubmit} marginBottom={"$3"} action='primary'  width={"$70%"} backgroundColor='#FFA600' color='white' p={2}>
                 <ButtonText>
                     Order
                 </ButtonText>

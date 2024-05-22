@@ -1,10 +1,11 @@
-import { Box, Heading, ModalBody, ModalFooter, Center, Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, Icon, CloseIcon, Card, VStack, Text, Button, ButtonText, FormControl, FormControlLabel, Input, InputField, FormControlLabelText } from '@gluestack-ui/themed';
-import React, { useState, useEffect } from 'react';
+import { Box,ScrollView, Heading, ModalBody, ModalFooter, Center, Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, Icon, CloseIcon, Card, VStack, Text, Button, ButtonText, FormControl, FormControlLabel, Input, InputField, FormControlLabelText } from '@gluestack-ui/themed';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Image, View, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ApiUrl, Img } from './API/Config';
 import { Picker } from '@react-native-picker/picker';
+import { useFocusEffect } from '@react-navigation/native';
 
 const InsertFood = () => {
     const [formData, setData] = useState({});
@@ -19,26 +20,31 @@ const InsertFood = () => {
     const [Id, setId] = useState('');
 
 
-
+    useFocusEffect(
+        useCallback(()=>{
+            const data = async () => {
+                try {
+                    const response = await axios.get(`${ApiUrl}foodIndex`);
+                    setFoodData(response.data);
+                    console.log("grups", response.data);
+                } catch (error) {
+                    console.log("error getting the groups", error);
+                }
+            };
+            const dataGroup = async () => {
+                try {
+                    const response = await axios.get(`${ApiUrl}FoodGroupIndex`);
+                    setGroupData(response.data);
+                } catch (error) {
+                    console.log("error getting the groups", error);
+                }
+            };
+            data();
+            dataGroup();
+        }, [])
+    );
     useEffect(() => {
-        const data = async () => {
-            try {
-                const response = await axios.get(`${ApiUrl}foodIndex`);
-                setFoodData(response.data);
-            } catch (error) {
-                console.log("error getting the groups", error);
-            }
-        };
-        const dataGroup = async () => {
-            try {
-                const response = await axios.get(`${ApiUrl}FoodGroupIndex`);
-                setGroupData(response.data);
-            } catch (error) {
-                console.log("error getting the groups", error);
-            }
-        };
-        data();
-        dataGroup();
+        
     }, []);
 
 
@@ -57,27 +63,37 @@ const InsertFood = () => {
         }
     };
     const onSubmit = async () => {
+        
         try {
             const responsee = await fetch(image);
             const blob = await responsee.blob();
 
 
-            console.log("name", formData.Name, "yyyy00", formData);
+          //  console.log("name", formData.Name, "yyyy00", formData);
             let formDta = new FormData();
             formDta.append('Name', formData.Name);
             formDta.append('Description', formData.Description);
             formDta.append('Price', formData.Price);
             formDta.append('idFoodGroupFK', formData.idFoodGroupFK);
-            formDta.append('Image', blob, 'filename.jpg');
+            //formDta.append('Image', 'hola');
+            //formDta.append('Image', blob, 'filename.jpg'); 
+            formDta.append('Image', {
+                uri: image, 
+                type: 'image/jpeg',
+                name: 'filename.jpg',
+              });
+            console.log("formdta", formDta)
 
             const response = await axios({
-                method: 'POST',
+                method: 'post',
                 url: `${ApiUrl}foodStore`,
                 data: formDta,
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
+
+            console.log("here")
 
             console.log("add", response.data);
             try {
@@ -88,10 +104,24 @@ const InsertFood = () => {
                 console.log("error getting the groups", error);
             }
             setShowModal(false);
+
+
+
         } catch (error) {
-            console.log("error", error);
+            if (error.response) {
+                // La solicitud fue realizada y el servidor respondió con un código de estado diferente de 2xx
+                console.error("Código de estado:", error.response.status);
+                console.error("Mensaje de error:", error.response.data);
+            } else if (error.request) {
+                // La solicitud se realizó pero no se recibió respuesta del servidor
+                console.error("No se recibió respuesta del servidor", error.request);
+            } else {
+                // Ocurrió un error al configurar la solicitud
+                console.error("Error al configurar la solicitud:", error.message);
+            }
         }
     }
+
 
     const onDelete = async (id: string) => {
         try {
@@ -250,7 +280,7 @@ const InsertFood = () => {
                 </Modal>
             </Box>
 
-            <Box width={"$full"} height={"$full"} p={4}>
+            <ScrollView >
                 {foodData.map((food, index) => (
                     <Card key={index} size="md" variant="filled" m="$3">
                         <Image
@@ -278,7 +308,7 @@ const InsertFood = () => {
                         </Button>
                     </Card>
                 ))}
-            </Box>
+            </ScrollView>
         </Box>
     );
 }
